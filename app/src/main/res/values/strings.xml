@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Металлист</string>
+
+    <!-- Разделы -->
+    <string name="section_calculator">Калькулятор</string>
+    <string name="section_iso">Допуски ISO</string>
+    <string name="section_materials">Материалы</string>
+    <string name="section_history">История</string>
+
+    <!-- Общее -->
+    <string name="calculate">Посчитать</string>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+    <string name="delete">Удалить</string>
+    <string name="edit">Редактировать</string>
+    <string name="add">Добавить</string>
+    <string name="clear">Очистить</string>
+    <string name="repeat">Повторить расчёт</string>
+
+    <!-- Поля -->
+    <string name="material">Материал</string>
+    <string name="density">Плотность</string>
+    <string name="density_unit">г/см³</string>
+    <string name="length">Длина</string>
+    <string name="quantity">Количество</string>
+    <string name="quantity_unit">шт.</string>
+    <string name="price_per_kg">Цена за 1 кг</string>
+    <string name="unit_mm">мм</string>
+    <string name="unit_m">м</string>
+    <string name="unit_cm">см</string>
+    <string name="unit_kg">кг</string>
+    <string name="unit_g">г</string>
+    <string name="unit_t">т</string>
+    <string name="mode_by_length">По длине</string>
+    <string name="mode_by_mass">По массе</string>
+    <string name="mode_calc">Расчёт</string>
+    <string name="mode_gost">По ГОСТ</string>
+
+    <!-- Результат -->
+    <string name="result_mass">Масса</string>
+    <string name="result_length">Длина</string>
+    <string name="result_volume">Объём</string>
+    <string name="result_price">Стоимость</string>
+    <string name="result_area">Площадь сечения</string>
+    <string name="result_linear_mass">Погонная масса</string>
+
+    <!-- Формы проката -->
+    <string name="shape_round">Круг</string>
+    <string name="shape_pipe_round">Труба круглая</string>
+    <string name="shape_square">Квадрат</string>
+    <string name="shape_hex">Шестигранник</string>
+    <string name="shape_sheet">Лист / полоса</string>
+    <string name="shape_bent_channel">Швеллер гнутый</string>
+    <string name="shape_pipe_rect">Труба прямоугольная</string>
+    <string name="shape_angle">Уголок равнополочный</string>
+    <string name="shape_i_beam">Двутавр</string>
+    <string name="shape_channel">Швеллер</string>
+    <string name="shape_rebar">Арматура</string>
+
+    <!-- ISO Допуски -->
+    <string name="iso_title">Допуски ISO</string>
+    <string name="iso_subtitle">метрические</string>
+    <string name="iso_nominal">Номинальный размер</string>
+    <string name="iso_hole">Отверстие</string>
+    <string name="iso_shaft">Вал</string>
+    <string name="iso_letter">Поле допуска</string>
+    <string name="iso_grade">Квалитет</string>
+    <string name="iso_tolerance">Допуск</string>
+    <string name="iso_size_avg">Размер (сред.)</string>
+    <string name="iso_upper">Верхнее отклонение</string>
+    <string name="iso_lower">Нижнее отклонение</string>
+    <string name="iso_max">Наибольший</string>
+    <string name="iso_min">Наименьший</string>
+
+    <!-- Материалы (23 базовых) -->
+    <string name="mat_steel">Сталь</string>
+    <string name="mat_aluminum">Алюминий</string>
+    <string name="mat_bronze">Бронза</string>
+    <string name="mat_duralumin">Дюралюминий</string>
+    <string name="mat_brass">Латунь</string>
+    <string name="mat_magnesium">Магний</string>
+    <string name="mat_copper">Медь</string>
+    <string name="mat_nickel">Никель</string>
+    <string name="mat_nichrome">Нихром</string>
+    <string name="mat_tin">Олово</string>
+    <string name="mat_lead">Свинец</string>
+    <string name="mat_stainless">Нержавеющая сталь</string>
+    <string name="mat_chrome">Хром</string>
+    <string name="mat_zinc">Цинк</string>
+    <string name="mat_cast_iron">Чугун</string>
+    <string name="mat_titanium">Титан</string>
+    <string name="mat_silver">Серебро</string>
+    <string name="mat_gold">Золото</string>
+    <string name="mat_platinum">Платина</string>
+    <string name="mat_textolite">Текстолит</string>
+    <string name="mat_capron">Капролон</string>
+    <string name="mat_ftoroplast">Фторопласт-4</string>
+    <string name="mat_paronite">Паронит</string>
+
+    <!-- Диалог добавления материала -->
+    <string name="dialog_add_material">Добавить материал</string>
+    <string name="material_name">Название</string>
+
+    <!-- История -->
+    <string name="history_empty">История пуста</string>
+    <string name="history_clear_all">Очистить всё</string>
+
+    <!-- Ошибки -->
+    <string name="error_invalid_input">Некорректный ввод</string>
+</resources>

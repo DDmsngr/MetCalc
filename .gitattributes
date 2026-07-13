@@ -1,0 +1,19 @@
+# Line endings
+* text=auto eol=lf
+
+# Shell scripts and gradlew MUST be LF, иначе CI на Linux не запустит
+gradlew text eol=lf
+*.sh text eol=lf
+
+# Windows batch — CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binaries
+gradle-wrapper.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.jar binary
+*.aar binary
+*.keystore binary

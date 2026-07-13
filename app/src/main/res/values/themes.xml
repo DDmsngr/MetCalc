@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.Metallist" parent="android:Theme.Material.NoActionBar" />
+
+    <style name="Theme.Metallist.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/MetCalc</item>
+        <item name="postSplashScreenTheme">@style/Theme.Metallist</item>
+    </style>
+
+</resources>
