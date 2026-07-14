@@ -1,17 +1,28 @@
 package tech.deepdrift.metallist.ui.calc
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -25,12 +36,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -50,9 +60,7 @@ import tech.deepdrift.metallist.domain.model.CalcDirection
 import tech.deepdrift.metallist.domain.model.Material
 import tech.deepdrift.metallist.domain.model.ProfileShape
 import tech.deepdrift.metallist.domain.model.ShapeMode
-import tech.deepdrift.metallist.ui.common.ShapeIcon
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalcScreen(
     shape: ProfileShape,
@@ -63,36 +71,31 @@ fun CalcScreen(
     val ui by vm.ui.collectAsState()
     val materials by vm.materials.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(shape.readableRes().let { stringResource(it) }) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                    }
-                },
-            )
-        },
-    ) { pad ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .imePadding(),
+    ) {
+        CompactHeader(title = stringResource(shape.readableRes()), onBack = onBack)
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(pad)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 24.dp)
+                .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                ShapeIcon(shape = shape, color = MaterialTheme.colorScheme.onSurface, sizeDp = 120)
-            }
-
-            MaterialPicker(
+            MaterialSearchPicker(
                 materials = materials,
                 selected = ui.selectedMaterial,
-                density = ui.density,
                 onPick = vm::onMaterialSelected,
-                onDensity = vm::onDensityChange,
+            )
+            NumberField(
+                label = stringResource(R.string.density) + ", " + stringResource(R.string.density_unit),
+                value = ui.density, onChange = vm::onDensityChange,
             )
 
             DirectionRow(ui.direction, vm::onDirectionChange)
@@ -134,56 +137,102 @@ fun CalcScreen(
                 Text(stringResource(R.string.calculate))
             }
 
-            ui.result?.let { r ->
-                ResultCard(r, ui.direction)
-            }
+            ui.result?.let { r -> ResultCard(r, ui.direction) }
         }
+    }
+}
+
+@Composable
+private fun CompactHeader(title: String, onBack: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 4.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+        }
+        Spacer(Modifier.width(4.dp))
+        Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MaterialPicker(
+private fun MaterialSearchPicker(
     materials: List<Material>,
     selected: Material?,
-    density: String,
     onPick: (Material) -> Unit,
-    onDensity: (String) -> Unit,
 ) {
+    var query by remember { mutableStateOf(selected?.name ?: "") }
     var expanded by remember { mutableStateOf(false) }
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded },
-        ) {
-            OutlinedTextField(
-                value = selected?.name ?: "",
-                onValueChange = {},
-                readOnly = true,
-                label = { Text(stringResource(R.string.material)) },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+
+    // При смене выбранного материала снаружи (например, восстановление из истории) — синхронизируем.
+    if (selected != null && !expanded && query != selected.name) {
+        query = selected.name
+    }
+
+    val filtered = remember(materials, query) {
+        if (query.isBlank()) materials
+        else materials.filter { it.name.startsWith(query, ignoreCase = true) }
+            .ifEmpty { materials.filter { it.name.contains(query, ignoreCase = true) } }
+    }
+
+    Column {
+        OutlinedTextField(
+            value = query,
+            onValueChange = {
+                query = it
+                expanded = true
+            },
+            label = { Text(stringResource(R.string.material)) },
+            singleLine = true,
+            trailingIcon = {
+                if (query.isNotEmpty()) {
+                    IconButton(onClick = {
+                        query = ""; expanded = true
+                    }) { Icon(Icons.Default.Clear, contentDescription = null) }
+                } else {
+                    IconButton(onClick = { expanded = !expanded }) {
+                        Icon(Icons.Default.ExpandMore, contentDescription = null)
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (expanded && filtered.isNotEmpty()) {
+            Surface(
+                tonalElevation = 4.dp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .menuAnchor(),
-            )
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
+                    .heightIn(max = 260.dp)
+                    .padding(top = 4.dp),
             ) {
-                materials.forEach { m ->
-                    DropdownMenuItem(
-                        text = { Text(m.name) },
-                        onClick = {
-                            onPick(m); expanded = false
-                        },
-                    )
+                LazyColumn {
+                    items(filtered, key = { it.id }) { m ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onPick(m)
+                                    query = m.name
+                                    expanded = false
+                                }
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text(m.name)
+                            Text(
+                                "%.2f".format(m.densityGCm3),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                        }
+                    }
                 }
             }
         }
-        NumberField(
-            label = stringResource(R.string.density) + ", " + stringResource(R.string.density_unit),
-            value = density, onChange = onDensity,
-        )
     }
 }
 
@@ -273,14 +322,11 @@ private fun ShapeInputs(shape: ProfileShape, ui: CalcUiState, vm: CalcViewModel)
             NumberField("D наружн." + mm, ui.d, vm::onDChange)
             NumberField("d внутр." + mm, ui.d2, vm::onD2Change)
         }
-        ProfileShape.Square -> {
-            NumberField("Сторона a" + mm, ui.d, vm::onDChange)
-        }
         ProfileShape.Hex -> {
             NumberField("Размер под ключ S" + mm, ui.d, vm::onDChange)
         }
-        ProfileShape.Sheet -> {
-            NumberField("Толщина t" + mm, ui.t, vm::onTChange)
+        ProfileShape.Plate -> {
+            NumberField("Толщина h" + mm, ui.t, vm::onTChange)
             NumberField("Ширина B" + mm, ui.b, vm::onBChange)
         }
         ProfileShape.BentChannel -> {
@@ -376,9 +422,8 @@ private fun formatLength(mm: Double): String = when {
 private fun ProfileShape.readableRes(): Int = when (this) {
     ProfileShape.Round -> R.string.shape_round
     ProfileShape.PipeRound -> R.string.shape_pipe_round
-    ProfileShape.Square -> R.string.shape_square
     ProfileShape.Hex -> R.string.shape_hex
-    ProfileShape.Sheet -> R.string.shape_sheet
+    ProfileShape.Plate -> R.string.shape_plate
     ProfileShape.BentChannel -> R.string.shape_bent_channel
     ProfileShape.PipeRect -> R.string.shape_pipe_rect
     ProfileShape.Angle -> R.string.shape_angle

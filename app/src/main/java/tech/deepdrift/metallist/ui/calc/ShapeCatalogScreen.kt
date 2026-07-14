@@ -33,9 +33,8 @@ private data class ShapeItem(val shape: ProfileShape, val nameRes: Int)
 private val shapeItems = listOf(
     ShapeItem(ProfileShape.Round, R.string.shape_round),
     ShapeItem(ProfileShape.PipeRound, R.string.shape_pipe_round),
-    ShapeItem(ProfileShape.Square, R.string.shape_square),
     ShapeItem(ProfileShape.Hex, R.string.shape_hex),
-    ShapeItem(ProfileShape.Sheet, R.string.shape_sheet),
+    ShapeItem(ProfileShape.Plate, R.string.shape_plate),
     ShapeItem(ProfileShape.BentChannel, R.string.shape_bent_channel),
     ShapeItem(ProfileShape.PipeRect, R.string.shape_pipe_rect),
     ShapeItem(ProfileShape.Angle, R.string.shape_angle),

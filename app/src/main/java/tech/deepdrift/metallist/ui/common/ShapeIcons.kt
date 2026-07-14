@@ -36,9 +36,8 @@ fun ShapeIcon(
             when (shape) {
                 ProfileShape.Round -> drawRound(w, h, color, stroke)
                 ProfileShape.PipeRound -> drawPipeRound(w, h, color, stroke)
-                ProfileShape.Square -> drawSquare(w, h, color, stroke, hatched = true)
                 ProfileShape.Hex -> drawHex(w, h, color, stroke)
-                ProfileShape.Sheet -> drawSheet(w, h, color, stroke)
+                ProfileShape.Plate -> drawSheet(w, h, color, stroke)
                 ProfileShape.BentChannel -> drawBent(w, h, color, stroke)
                 ProfileShape.PipeRect -> drawPipeRect(w, h, color, stroke)
                 ProfileShape.Angle -> drawAngle(w, h, color, stroke)
@@ -72,21 +71,6 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawPipeRound(
     val r = kotlin.math.min(w, h) * 0.36f
     drawCircle(c, r, Offset(cx, cy), style = s)
     drawCircle(c, r * 0.55f, Offset(cx, cy), style = s)
-}
-
-private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawSquare(
-    w: Float, h: Float, c: Color, s: Stroke, hatched: Boolean,
-) {
-    val a = kotlin.math.min(w, h) * 0.7f
-    val left = (w - a) / 2f; val top = (h - a) / 2f
-    drawRect(c, topLeft = Offset(left, top), size = Size(a, a), style = s)
-    if (hatched) {
-        val step = a / 8f
-        for (i in 1..7) {
-            drawLine(c, Offset(left + i * step, top), Offset(left, top + i * step), strokeWidth = 1.5f)
-            drawLine(c, Offset(left + a, top + i * step), Offset(left + i * step, top + a), strokeWidth = 1.5f)
-        }
-    }
 }
 
 private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawHex(

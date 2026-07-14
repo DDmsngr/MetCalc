@@ -86,24 +86,28 @@ class CalcViewModel @Inject constructor(
         }
     }
 
-    fun onMaterialSelected(m: Material) = _ui.update {
+    /** Любой input сбрасывает результат — избегает рассинхрона отображаемых цифр и полей. */
+    private inline fun edit(crossinline block: (CalcUiState) -> CalcUiState) =
+        _ui.update { block(it).copy(result = null) }
+
+    fun onMaterialSelected(m: Material) = edit {
         it.copy(selectedMaterial = m, density = m.densityGCm3.toString())
     }
 
-    fun onDensityChange(v: String) = _ui.update { it.copy(density = v) }
-    fun onModeChange(m: ShapeMode) = _ui.update { it.copy(mode = m) }
-    fun onDirectionChange(d: CalcDirection) = _ui.update { it.copy(direction = d) }
-    fun onDChange(v: String) = _ui.update { it.copy(d = v) }
-    fun onD2Change(v: String) = _ui.update { it.copy(d2 = v) }
-    fun onHChange(v: String) = _ui.update { it.copy(h = v) }
-    fun onBChange(v: String) = _ui.update { it.copy(b = v) }
-    fun onTChange(v: String) = _ui.update { it.copy(t = v) }
-    fun onSChange(v: String) = _ui.update { it.copy(s = v) }
-    fun onGostChange(v: String?) = _ui.update { it.copy(gostNumber = v) }
-    fun onLengthChange(v: String) = _ui.update { it.copy(length = v) }
-    fun onMassChange(v: String) = _ui.update { it.copy(mass = v) }
-    fun onQuantityChange(v: String) = _ui.update { it.copy(quantity = v) }
-    fun onPriceChange(v: String) = _ui.update { it.copy(price = v) }
+    fun onDensityChange(v: String) = edit { it.copy(density = v) }
+    fun onModeChange(m: ShapeMode) = edit { it.copy(mode = m) }
+    fun onDirectionChange(d: CalcDirection) = edit { it.copy(direction = d) }
+    fun onDChange(v: String) = edit { it.copy(d = v) }
+    fun onD2Change(v: String) = edit { it.copy(d2 = v) }
+    fun onHChange(v: String) = edit { it.copy(h = v) }
+    fun onBChange(v: String) = edit { it.copy(b = v) }
+    fun onTChange(v: String) = edit { it.copy(t = v) }
+    fun onSChange(v: String) = edit { it.copy(s = v) }
+    fun onGostChange(v: String?) = edit { it.copy(gostNumber = v) }
+    fun onLengthChange(v: String) = edit { it.copy(length = v) }
+    fun onMassChange(v: String) = edit { it.copy(mass = v) }
+    fun onQuantityChange(v: String) = edit { it.copy(quantity = v) }
+    fun onPriceChange(v: String) = edit { it.copy(price = v) }
 
     fun calculate() {
         val u = _ui.value
@@ -190,9 +194,8 @@ private fun Double.orBlank(): String = if (this == 0.0) "" else this.toString()
 private fun ProfileShape.readable(): String = when (this) {
     ProfileShape.Round -> "Круг"
     ProfileShape.PipeRound -> "Труба круглая"
-    ProfileShape.Square -> "Квадрат"
     ProfileShape.Hex -> "Шестигранник"
-    ProfileShape.Sheet -> "Лист"
+    ProfileShape.Plate -> "Плита"
     ProfileShape.BentChannel -> "Швеллер гнутый"
     ProfileShape.PipeRect -> "Труба прямоугольная"
     ProfileShape.Angle -> "Уголок"

@@ -48,9 +48,8 @@
     <!-- Формы проката -->
     <string name="shape_round">Круг</string>
     <string name="shape_pipe_round">Труба круглая</string>
-    <string name="shape_square">Квадрат</string>
     <string name="shape_hex">Шестигранник</string>
-    <string name="shape_sheet">Лист / полоса</string>
+    <string name="shape_plate">Плита</string>
     <string name="shape_bent_channel">Швеллер гнутый</string>
     <string name="shape_pipe_rect">Труба прямоугольная</string>
     <string name="shape_angle">Уголок равнополочный</string>

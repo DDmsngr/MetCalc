@@ -7,9 +7,8 @@ package tech.deepdrift.metallist.domain.model
 enum class ProfileShape(val supportsGost: Boolean) {
     Round(false),           // Круг сплошной
     PipeRound(false),       // Труба круглая
-    Square(false),          // Квадрат сплошной
     Hex(false),             // Шестигранник (размер под ключ)
-    Sheet(false),           // Лист / полоса
+    Plate(false),           // Плита / лист / полоса (толщина × ширина × длина)
     BentChannel(false),     // Швеллер гнутый
     PipeRect(false),        // Труба прямоугольная
     Angle(true),            // Уголок равнополочный (ГОСТ 8509)

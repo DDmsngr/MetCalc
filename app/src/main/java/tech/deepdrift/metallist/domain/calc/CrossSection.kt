@@ -17,9 +17,8 @@ object CrossSection {
     fun area(shape: ProfileShape, p: ShapeParams): Double = when (shape) {
         ProfileShape.Round -> round(p.d)
         ProfileShape.PipeRound -> pipeRound(p.d, p.d2)
-        ProfileShape.Square -> square(p.d)
         ProfileShape.Hex -> hex(p.d)
-        ProfileShape.Sheet -> sheet(p.t, p.b)
+        ProfileShape.Plate -> sheet(p.t, p.b)
         ProfileShape.BentChannel -> bentChannel(p.h, p.b, p.t)
         ProfileShape.PipeRect -> pipeRect(p.h, p.b, p.t)
         ProfileShape.Angle -> angleEqual(p.b, p.t)
