@@ -25,6 +25,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import tech.deepdrift.metallist.R
 import tech.deepdrift.metallist.domain.model.ProfileShape
+import tech.deepdrift.metallist.ui.application.ApplicationScreen
 import tech.deepdrift.metallist.ui.calc.CalcScreen
 import tech.deepdrift.metallist.ui.calc.ShapeCatalogScreen
 import tech.deepdrift.metallist.ui.history.HistoryScreen
@@ -89,14 +90,22 @@ fun MetallistNavHost() {
             composable(Screen.Iso.route) { IsoScreen() }
             composable(Screen.Materials.route) { MaterialsScreen() }
             composable(Screen.History.route) {
-                HistoryScreen(onOpen = { historyId, shapeName, kind ->
-                    if (kind == "metal") {
-                        nav.navigate("calc/$shapeName?historyId=$historyId")
-                    } else {
-                        // ISO history — просто открываем ISO вкладку.
-                        nav.navigate(Screen.Iso.route)
-                    }
-                })
+                HistoryScreen(
+                    onOpen = { historyId, shapeName, kind ->
+                        if (kind == "metal") {
+                            nav.navigate("calc/$shapeName?historyId=$historyId")
+                        } else {
+                            nav.navigate(Screen.Iso.route)
+                        }
+                    },
+                    onCreateApplication = { ids ->
+                        val idsArg = ids.joinToString(",")
+                        nav.navigate("application?ids=$idsArg")
+                    },
+                )
+            }
+            composable("application?ids={ids}") {
+                ApplicationScreen(onBack = { nav.popBackStack() })
             }
         }
     }
