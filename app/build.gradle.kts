@@ -22,10 +22,24 @@ android {
         vectorDrawables.useSupportLibrary = true
     }
 
+    signingConfigs {
+        getByName("debug") {
+            // Фиксированный debug keystore, чтобы APK всегда имел одинаковую подпись
+            // и Android мог обновлять приложение поверх, а не требовать удаление.
+            val ks = rootProject.file("debug.keystore")
+            if (ks.exists()) {
+                storeFile = ks
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
+    }
+
     buildTypes {
         debug {
-            applicationIdSuffix = ".debug"
-            versionNameSuffix = "-debug"
+            // debug имеет тот же applicationId что и release — обновление работает
+            signingConfig = signingConfigs.getByName("debug")
         }
         release {
             isMinifyEnabled = true

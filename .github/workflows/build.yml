@@ -16,6 +16,8 @@ jobs:
     name: Assemble debug APK + unit tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,6 +33,31 @@ jobs:
 
       - name: Grant gradlew executable
         run: chmod +x ./gradlew
+
+      # Фиксированная debug-подпись: если keystore ещё нет в репозитории —
+      # создаём его через keytool и коммитим один раз. Дальнейшие сборки
+      # используют этот же файл, поэтому debug APK всегда имеет одинаковую
+      # подпись и Android может обновлять его поверх без удаления.
+      - name: Ensure debug.keystore
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ ! -f debug.keystore ]; then
+            echo "Generating debug.keystore..."
+            keytool -genkey -v \
+              -keystore debug.keystore \
+              -alias androiddebugkey \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass android -keypass android \
+              -dname "CN=Android Debug,O=Android,C=US"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add debug.keystore
+            git commit -m "chore: fixed debug keystore for consistent APK signature"
+            git push
+          else
+            echo "debug.keystore already present, using existing."
+          fi
 
       - name: Unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
