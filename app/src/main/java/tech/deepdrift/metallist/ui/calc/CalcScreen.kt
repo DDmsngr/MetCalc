@@ -110,10 +110,29 @@ fun CalcScreen(
                 ModeSwitcher(ui.mode, vm::onModeChange)
             }
 
-            if (ui.mode == ShapeMode.Gost && shape.supportsGost) {
-                GostPicker(shape, ui.gostNumber, vm::onGostChange)
-            } else {
-                ShapeInputs(shape, ui, vm)
+            // Выпадашка «Стандарт» — только для форм, у которых есть подформаты
+            if (StandardCatalog.hasStandardsFor(shape)) {
+                StandardPicker(
+                    shape = shape,
+                    selectedStandard = ui.standard,
+                    onChange = vm::onStandardChange,
+                )
+            }
+
+            when {
+                ui.mode == ShapeMode.Gost && shape.supportsGost ->
+                    GostPicker(shape, ui.gostNumber, vm::onGostChange)
+                ui.standard != null ->
+                    StandardOptionInputs(
+                        shape = shape,
+                        standard = ui.standard!!,
+                        option = ui.standardOption,
+                        t = ui.t, b = ui.b,
+                        onOption = vm::onStandardOptionChange,
+                        onT = vm::onTChange,
+                        onB = vm::onBChange,
+                    )
+                else -> ShapeInputs(shape, ui, vm)
             }
 
             if (ui.direction == CalcDirection.ByLength) {

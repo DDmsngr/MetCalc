@@ -46,6 +46,13 @@ object ApplicationFormat {
         val len = if (s.lengthMm > 0) " × L ${fmt(s.lengthMm)}" else ""
         val shape = ProfileShape.valueOf(s.shape)
         val isGost = s.mode == "Gost" && s.gostNumber != null
+
+        // Стандарты сечения имеют собственное строковое представление.
+        s.standard?.let { std ->
+            val core = dimensionsByStandard(std, s.standardOption)
+            if (core != null) return core + len
+        }
+
         val core = when (shape) {
             ProfileShape.Round -> "⌀${fmt(s.d)}"
             ProfileShape.PipeRound -> "⌀${fmt(s.d)}/${fmt(s.d2)}"
@@ -59,6 +66,28 @@ object ApplicationFormat {
             ProfileShape.Rebar -> if (isGost) "⌀${s.gostNumber}" else "⌀${fmt(s.d)}"
         }
         return core + len
+    }
+
+    private fun dimensionsByStandard(std: String, opt: String?): String? = when (std) {
+        "GOST_3262" -> {
+            // opt: "20|Normal"
+            val (du, cls) = opt?.split("|", limit = 2)?.let {
+                (it.getOrNull(0) ?: "") to (it.getOrNull(1) ?: "")
+            } ?: ("" to "")
+            val clsLabel = when (cls) { "Light" -> "лёгкая"; "Heavy" -> "усиленная"; else -> "обычная" }
+            "Ду$du ($clsLabel, ГОСТ 3262)"
+        }
+        "GOST_8568" -> {
+            val kind = if (opt == "Lentil") "чечевица" else "ромб"
+            "рифл. $kind (ГОСТ 8568)"
+        }
+        "GOST_24045" -> {
+            val (profile, thick) = opt?.split("|", limit = 2)?.let {
+                (it.getOrNull(0) ?: "") to (it.getOrNull(1) ?: "")
+            } ?: ("" to "")
+            "$profile × $thick мм (ГОСТ 24045)"
+        }
+        else -> null
     }
 
     private fun fmt(v: Double): String {

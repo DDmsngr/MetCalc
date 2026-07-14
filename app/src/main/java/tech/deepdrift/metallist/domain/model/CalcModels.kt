@@ -18,7 +18,9 @@ data class ShapeParams(
     val b: Double = 0.0,        // ширина / ширина полки
     val t: Double = 0.0,        // толщина / толщина полки
     val s: Double = 0.0,        // толщина стенки
-    val gostNumber: String? = null, // для ГОСТ-режима
+    val gostNumber: String? = null,     // для ГОСТ-режима (двутавр/швеллер/уголок/арматура)
+    val standard: String? = null,       // выбранный стандарт: "GOST_3262" / "GOST_8568" / "GOST_24045"
+    val standardOption: String? = null, // опция стандарта: "20|Normal", "Rhombus", "С21-1000|0.6"
 )
 
 data class CalcRequest(

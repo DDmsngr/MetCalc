@@ -35,6 +35,8 @@ data class CalcSnapshot(
     val h: Double = 0.0, val b: Double = 0.0,
     val t: Double = 0.0, val s: Double = 0.0,
     val gostNumber: String? = null,
+    val standard: String? = null,
+    val standardOption: String? = null,
     val materialName: String,
     val grade: String? = null,
     val density: Double,
@@ -52,6 +54,8 @@ data class CalcUiState(
     val h: String = "", val b: String = "",
     val t: String = "", val s: String = "",
     val gostNumber: String? = null,
+    val standard: String? = null,       // "GOST_3262" / "GOST_8568" / "GOST_24045"
+    val standardOption: String? = null, // конкретный подвариант (Ду+класс, ромб/чеч, профиль+толщина)
     val length: String = "",
     val mass: String = "",
     val quantity: String = "1",
@@ -109,6 +113,16 @@ class CalcViewModel @Inject constructor(
     fun onTChange(v: String) = edit { it.copy(t = v) }
     fun onSChange(v: String) = edit { it.copy(s = v) }
     fun onGostChange(v: String?) = edit { it.copy(gostNumber = v) }
+    fun onStandardChange(std: String?) = edit {
+        // При смене стандарта сбрасываем подвариант и все ранее введённые размеры,
+        // чтобы не попасть в противоречивое состояние.
+        it.copy(
+            standard = std,
+            standardOption = null,
+            d = "", d2 = "", h = "", b = "", t = "", s = "",
+        )
+    }
+    fun onStandardOptionChange(opt: String?) = edit { it.copy(standardOption = opt) }
     fun onLengthChange(v: String) = edit { it.copy(length = v) }
     fun onMassChange(v: String) = edit { it.copy(mass = v) }
     fun onQuantityChange(v: String) = edit { it.copy(quantity = v) }
@@ -127,6 +141,8 @@ class CalcViewModel @Inject constructor(
                 t = u.t.parseDouble(),
                 s = u.s.parseDouble(),
                 gostNumber = u.gostNumber,
+                standard = u.standard,
+                standardOption = u.standardOption,
             ),
             densityGCm3 = u.density.parseDouble(7.85),
             direction = u.direction,
@@ -151,6 +167,8 @@ class CalcViewModel @Inject constructor(
             h = req.params.h, b = req.params.b,
             t = req.params.t, s = req.params.s,
             gostNumber = req.params.gostNumber,
+            standard = req.params.standard,
+            standardOption = req.params.standardOption,
             materialName = materialName,
             grade = gradeTrimmed,
             density = req.densityGCm3,
@@ -191,6 +209,8 @@ class CalcViewModel @Inject constructor(
                 price = snap.pricePerKg.toString(),
                 density = snap.density.toString(),
                 grade = snap.grade.orEmpty(),
+                standard = snap.standard,
+                standardOption = snap.standardOption,
             )
         }
     }

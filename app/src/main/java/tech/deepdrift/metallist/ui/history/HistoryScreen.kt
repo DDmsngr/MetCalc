@@ -15,8 +15,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -116,14 +116,13 @@ fun HistoryScreen(
                     }
                 },
                 actions = {
-                    if (selection.active) {
-                        // ничего
-                    } else if (items.isNotEmpty()) {
-                        IconButton(onClick = vm::startSelection) {
-                            Icon(Icons.Outlined.CheckBox, contentDescription = "Выбрать")
+                    if (!selection.active && items.isNotEmpty()) {
+                        TextButton(onClick = vm::startSelection) {
+                            Icon(Icons.Default.Description, contentDescription = null)
+                            Text("  Заявка")
                         }
                         IconButton(onClick = vm::clearAll) {
-                            Icon(Icons.Default.DeleteSweep, contentDescription = null)
+                            Icon(Icons.Default.DeleteSweep, contentDescription = "Очистить историю")
                         }
                     }
                 },

@@ -60,23 +60,75 @@ object MetalCalculator {
      * если материал отличается от стали.
      */
     private fun areaAndLinearMass(req: CalcRequest): Pair<Double, Double> {
+        // 1) Профили ГОСТ (двутавр/швеллер/уголок/арматура) — таблица погонной массы.
         if (req.mode == ShapeMode.Gost) {
             val gost = pickGostMass(req)
             if (gost != null) {
-                // Пересчёт под пользовательскую плотность
                 val scale = req.densityGCm3 / GostProfiles.STEEL_DENSITY_G_CM3
                 val linear = gost * scale
-                // площадь считаем обратно из погонной массы (для консистентности отображения):
-                // m [кг/м] = A [мм²] * ρ [г/см³] * 1e-3
-                // A [мм²] = m / (ρ * 1e-3)
                 val area = linear / (req.densityGCm3 * 1e-3)
                 return area to linear
             }
         }
+
+        // 2) Подставные стандарты сечения (ГОСТ 3262 для трубы, ГОСТ 8568/24045 для плиты).
+        val standardResult = resolveStandard(req)
+        if (standardResult != null) return standardResult
+
+        // 3) Обычный расчёт по геометрии сечения.
         val area = CrossSection.area(req.shape, req.params)
-        // Погонная масса: A [мм²] × ρ [г/см³] × 1e-3 = кг/м
         val linear = area * req.densityGCm3 * 1e-3
         return area to linear
+    }
+
+    /**
+     * Возвращает (площадь, погонная масса), если запрос использует один из стандартов
+     * сечения (ГОСТ 3262 / 8568 / 24045). Иначе null — используется обычная геометрия.
+     */
+    private fun resolveStandard(req: CalcRequest): Pair<Double, Double>? {
+        val std = req.params.standard ?: return null
+        val opt = req.params.standardOption
+        val ro = req.densityGCm3
+        return when (std) {
+            "GOST_3262" -> {
+                // opt формата "Ду|Класс", напр. "20|Normal"
+                val (duStr, clsStr) = opt?.split("|", limit = 2)?.let {
+                    (it.getOrNull(0) ?: "") to (it.getOrNull(1) ?: "")
+                } ?: return null
+                val pipe = duStr.toIntOrNull()?.let(GostPipes3262::byDu) ?: return null
+                val cls = runCatching { Pipe3262Class.valueOf(clsStr) }.getOrNull() ?: Pipe3262Class.Normal
+                val t = pipe.thickness(cls)
+                val area = CrossSection.pipeRound(pipe.dOuter, pipe.dOuter - 2.0 * t)
+                area to area * ro * 1e-3
+            }
+            "GOST_8568" -> {
+                // opt: "Rhombus" | "Lentil"
+                val pattern = runCatching { RiflePattern.valueOf(opt ?: "") }.getOrNull() ?: return null
+                val area = CrossSection.sheet(req.params.t, req.params.b)
+                val linear = area * ro * 1e-3 * pattern.coefficient
+                // Площадь возвращаем «эффективную», чтобы соответствовать погонной массе
+                val effArea = linear / (ro * 1e-3)
+                effArea to linear
+            }
+            "GOST_24045" -> {
+                // opt: "Профиль|Толщина", напр. "С21-1000|0.6"
+                val (profileName, thickStr) = opt?.split("|", limit = 2)?.let {
+                    (it.getOrNull(0) ?: "") to (it.getOrNull(1) ?: "")
+                } ?: return null
+                val profile = GostProfiledSheets.byName(profileName) ?: return null
+                val thick = thickStr.replace(',', '.').toDoubleOrNull() ?: return null
+                val row = profile.thicknessOptions.firstOrNull {
+                    kotlin.math.abs(it.thicknessMm - thick) < 1e-3
+                } ?: return null
+                // Табличная масса даётся на м² при ρ=7.85. Пересчёт под материал:
+                val massKgM2 = row.massKgM2 * (ro / GostProfiles.STEEL_DENSITY_G_CM3)
+                // Погонная масса профлиста при заданной полезной ширине:
+                val linear = massKgM2 * (profile.widthMm / 1000.0)
+                val area = linear / (ro * 1e-3)
+                area to linear
+            }
+            else -> null
+        }
     }
 
     private fun pickGostMass(req: CalcRequest): Double? {
