@@ -58,6 +58,7 @@ import tech.deepdrift.metallist.R
 import tech.deepdrift.metallist.domain.calc.GostProfiles
 import tech.deepdrift.metallist.domain.model.CalcDirection
 import tech.deepdrift.metallist.domain.model.Material
+import tech.deepdrift.metallist.domain.model.MaterialGrades
 import tech.deepdrift.metallist.domain.model.ProfileShape
 import tech.deepdrift.metallist.domain.model.ShapeMode
 
@@ -92,6 +93,11 @@ fun CalcScreen(
                 materials = materials,
                 selected = ui.selectedMaterial,
                 onPick = vm::onMaterialSelected,
+            )
+            GradePicker(
+                material = ui.selectedMaterial,
+                grade = ui.grade,
+                onChange = vm::onGradeChange,
             )
             NumberField(
                 label = stringResource(R.string.density) + ", " + stringResource(R.string.density_unit),
@@ -228,6 +234,74 @@ private fun MaterialSearchPicker(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 style = MaterialTheme.typography.labelSmall,
                             )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GradePicker(
+    material: Material?,
+    grade: String,
+    onChange: (String) -> Unit,
+) {
+    val allSuggestions = remember(material?.name) {
+        MaterialGrades.suggestionsFor(material?.name)
+    }
+    var expanded by remember { mutableStateOf(false) }
+
+    val filtered = remember(allSuggestions, grade) {
+        if (grade.isBlank()) allSuggestions
+        else allSuggestions.filter { it.contains(grade, ignoreCase = true) }
+    }
+
+    Column {
+        OutlinedTextField(
+            value = grade,
+            onValueChange = {
+                onChange(it)
+                expanded = true
+            },
+            label = { Text(stringResource(R.string.grade)) },
+            placeholder = { Text(stringResource(R.string.grade_hint)) },
+            singleLine = true,
+            trailingIcon = {
+                if (grade.isNotEmpty()) {
+                    IconButton(onClick = {
+                        onChange("")
+                        expanded = allSuggestions.isNotEmpty()
+                    }) { Icon(Icons.Default.Clear, contentDescription = null) }
+                } else if (allSuggestions.isNotEmpty()) {
+                    IconButton(onClick = { expanded = !expanded }) {
+                        Icon(Icons.Default.ExpandMore, contentDescription = null)
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (expanded && filtered.isNotEmpty()) {
+            Surface(
+                tonalElevation = 4.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 220.dp)
+                    .padding(top = 4.dp),
+            ) {
+                LazyColumn {
+                    items(filtered, key = { it }) { g ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onChange(g)
+                                    expanded = false
+                                }
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                        ) {
+                            Text(g)
                         }
                     }
                 }

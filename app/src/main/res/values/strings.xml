@@ -20,6 +20,8 @@
 
     <!-- Поля -->
     <string name="material">Материал</string>
+    <string name="grade">Марка (необязательно)</string>
+    <string name="grade_hint">Ст3, 12Х18Н10Т, Д16Т…</string>
     <string name="density">Плотность</string>
     <string name="density_unit">г/см³</string>
     <string name="length">Длина</string>

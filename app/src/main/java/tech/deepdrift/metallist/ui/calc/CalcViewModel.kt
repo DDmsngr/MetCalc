@@ -36,6 +36,7 @@ data class CalcSnapshot(
     val t: Double = 0.0, val s: Double = 0.0,
     val gostNumber: String? = null,
     val materialName: String,
+    val grade: String? = null,
     val density: Double,
     val lengthMm: Double = 0.0,
     val massKg: Double = 0.0,
@@ -57,6 +58,7 @@ data class CalcUiState(
     val price: String = "0",
     val selectedMaterial: Material? = null,
     val density: String = "7.85",
+    val grade: String = "",
     val result: CalcResult? = null,
 )
 
@@ -91,10 +93,13 @@ class CalcViewModel @Inject constructor(
         _ui.update { block(it).copy(result = null) }
 
     fun onMaterialSelected(m: Material) = edit {
-        it.copy(selectedMaterial = m, density = m.densityGCm3.toString())
+        // При смене материала обнуляем марку — старая может быть несовместимой
+        // с новой категорией (напр. алюминиевая Д16 у стали).
+        it.copy(selectedMaterial = m, density = m.densityGCm3.toString(), grade = "")
     }
 
     fun onDensityChange(v: String) = edit { it.copy(density = v) }
+    fun onGradeChange(v: String) = edit { it.copy(grade = v) }
     fun onModeChange(m: ShapeMode) = edit { it.copy(mode = m) }
     fun onDirectionChange(d: CalcDirection) = edit { it.copy(direction = d) }
     fun onDChange(v: String) = edit { it.copy(d = v) }
@@ -136,6 +141,8 @@ class CalcViewModel @Inject constructor(
     }
 
     private suspend fun saveToHistory(req: CalcRequest, res: CalcResult) {
+        val gradeTrimmed = _ui.value.grade.trim().takeIf { it.isNotEmpty() }
+        val materialName = _ui.value.selectedMaterial?.name ?: "—"
         val snap = CalcSnapshot(
             shape = req.shape.name,
             mode = req.mode.name,
@@ -144,7 +151,8 @@ class CalcViewModel @Inject constructor(
             h = req.params.h, b = req.params.b,
             t = req.params.t, s = req.params.s,
             gostNumber = req.params.gostNumber,
-            materialName = _ui.value.selectedMaterial?.name ?: "—",
+            materialName = materialName,
+            grade = gradeTrimmed,
             density = req.densityGCm3,
             lengthMm = req.lengthMm,
             massKg = req.massKg,
@@ -152,7 +160,8 @@ class CalcViewModel @Inject constructor(
             pricePerKg = req.pricePerKg,
         )
         val json = Json.encodeToString(CalcSnapshot.serializer(), snap)
-        val title = "${req.shape.readable()} · ${snap.materialName}"
+        val displayMaterial = gradeTrimmed ?: materialName
+        val title = "${req.shape.readable()} · $displayMaterial"
         val summary = "Масса ${"%.3f".format(res.totalMassKg)} кг · Длина ${"%.0f".format(res.totalLengthMm)} мм"
         historyRepo.add(
             HistoryEntity(
@@ -181,6 +190,7 @@ class CalcViewModel @Inject constructor(
                 quantity = snap.quantity.toString(),
                 price = snap.pricePerKg.toString(),
                 density = snap.density.toString(),
+                grade = snap.grade.orEmpty(),
             )
         }
     }
