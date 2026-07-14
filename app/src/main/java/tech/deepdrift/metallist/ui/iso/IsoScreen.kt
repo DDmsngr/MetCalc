@@ -14,6 +14,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -141,7 +143,7 @@ fun IsoScreen(vm: IsoViewModel = hiltViewModel()) {
                 }
             }
 
-            androidx.compose.material3.Button(
+            Button(
                 onClick = vm::calculate,
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.calculate)) }
@@ -165,7 +167,7 @@ private fun LetterDropdown(letters: List<String>, selected: String, onPick: (Str
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.fillMaxWidth().menuAnchor(),
         )
-        androidx.compose.material3.ExposedDropdownMenu(
+        ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
         ) {
@@ -188,7 +190,7 @@ private fun GradeDropdown(grades: List<String>, selected: String, onPick: (Strin
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.fillMaxWidth().menuAnchor(),
         )
-        androidx.compose.material3.ExposedDropdownMenu(
+        ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
         ) {

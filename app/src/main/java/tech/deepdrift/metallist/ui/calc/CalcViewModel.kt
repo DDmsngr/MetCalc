@@ -67,8 +67,9 @@ class CalcViewModel @Inject constructor(
     private val historyRepo: HistoryRepository,
 ) : ViewModel() {
 
-    private val shapeName: String = savedState["shape"] ?: ProfileShape.Round.name
-    private val historyId: Long = savedState["historyId"]?.toString()?.toLongOrNull() ?: 0L
+    private val shapeName: String = savedState.get<String>("shape") ?: ProfileShape.Round.name
+    private val historyId: Long =
+        savedState.get<String>("historyId")?.toLongOrNull() ?: 0L
 
     val materials: StateFlow<List<Material>> = materialsRepo.observeAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
